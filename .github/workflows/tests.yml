@@ -1,0 +1,38 @@
+name: tests
+
+on: ['push']
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        php: [8.0, 8.1]
+        laravel: [9.*]
+        stability: [prefer-lowest, prefer-stable]
+        include:
+          - laravel: 9.*
+            testbench: 7.*
+
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - P${{ matrix.php }} - ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, mbstring, zip, pcntl, bcmath, intl
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+
+      - name: Execute tests
+        run: vendor/bin/pest

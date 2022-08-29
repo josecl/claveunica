@@ -1,0 +1,15 @@
+
+parameters:
+    level: 8
+
+    paths:
+        - src
+        - tests
+
+    checkOctaneCompatibility: true
+    checkMissingIterableValueType: false
+
+    ignoreErrors:
+        - '#Call to an undefined method Pest\\Expectation.*#'
+        - '#Access to an undefined property Pest\\Expectation.*#'
+        - '#Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage.*#'

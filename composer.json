@@ -1,0 +1,69 @@
+{
+    "name": "josecl/claveunica",
+    "type": "library",
+    "description": "Cliente Laravel para autenticar con servicio OAuth2 de ClaveÚnica del Gobierno de Chile",
+    "keywords": [
+        "claveunica",
+        "laravel",
+        "oauth",
+        "socialite",
+        "provider"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.0",
+        "ext-json": "*",
+        "socialiteproviders/manager": "~4.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.9",
+        "nunomaduro/collision": "^6.0",
+        "nunomaduro/larastan": "^2.0.1",
+        "orchestra/testbench": "^7.0",
+        "pestphp/pest": "^1.21",
+        "pestphp/pest-plugin-laravel": "^1.2",
+        "pestphp/pest-plugin-mock": "^1.0",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan-deprecation-rules": "^1.0",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpunit/phpunit": "^9.5",
+        "roave/security-advisories": "dev-latest"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Josecl\\ClaveUnica\\ClaveUnicaServiceProvider"
+            ],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Josecl\\ClaveUnica\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Josecl\\ClaveUnica\\Tests\\": "tests"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "analyze": "./vendor/bin/phpstan analyze --memory-limit=2G",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "lint": "./vendor/bin/php-cs-fixer fix --no-interaction --verbose",
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php ./vendor/bin/testbench package:discover --ansi"
+        ]
+    }
+}
