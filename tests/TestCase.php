@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Josecl\ClaveUnica\Tests;
 
-use Illuminate\Support\Facades\Http;
 use Josecl\ClaveUnica\ClaveUnicaServiceProvider;
 use SocialiteProviders\Manager\ServiceProvider;
 
@@ -13,8 +12,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        Http::preventStrayRequests();
     }
 
     protected function getPackageProviders($app): array
