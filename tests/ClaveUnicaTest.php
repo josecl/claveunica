@@ -6,12 +6,12 @@ declare(strict_types=1);
 use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\Psr7\Response as GuzzleHttpResponse;
 use Josecl\ClaveUnica\ClaveUnicaException;
-use Josecl\ClaveUnica\ClaveUnicaGetUser;
 use Laravel\Socialite\Facades\Socialite;
 
 beforeEach(function () {
     config(['claveunica.autologin' => true]);
 });
+
 
 
 
@@ -23,6 +23,7 @@ test('redirect', function () {
         ->getTargetUrl()->toStartWith(config('services.claveunica.auth_uri'))
     ;
 });
+
 
 
 
@@ -54,9 +55,7 @@ test('user', function () {
             body: json_encode($user, JSON_THROW_ON_ERROR)
         ));
 
-    Socialite::driver('claveunica')->stateless();
-
-    $claveUnicaUser = app(ClaveUnicaGetUser::class)->user();
+    $claveUnicaUser = Socialite::driver('claveunica')->stateless()->user();
 
     expect($claveUnicaUser)
         ->user->toBe($user)
@@ -68,7 +67,10 @@ test('user', function () {
     ;
 });
 
-test('user failed', function () {
+
+
+
+test('user throws ClaveUnicaException', function (mixed $responseBody) {
     Mockery::mock('overload:' . GuzzleHttpClient::class)
         ->shouldReceive('post')
         ->withSomeOfArgs(config('services.claveunica.token_uri'))
@@ -81,14 +83,17 @@ test('user failed', function () {
         ))
         ->shouldReceive('post')
         ->withSomeOfArgs(config('services.claveunica.user_uri'))
-        ->andReturn(new GuzzleHttpResponse(
-            401
-        ))
-    ;
+        ->andReturn(new GuzzleHttpResponse(body: $responseBody));
 
-    Socialite::driver('claveunica')->stateless();
+    $exception = rescue(
+        fn () => Socialite::driver('claveunica')->stateless()->user(),
+        rescue: fn ($exception) => $exception,
+    );
 
-    test()->expectException(ClaveUnicaException::class);
-
-    app(ClaveUnicaGetUser::class)->user();
-});
+    expect($exception)
+        ->toBeInstanceOf(ClaveUnicaException::class);
+})->with([
+    [''],
+    ['{}'],
+    ['::json-malformed::'],
+]);

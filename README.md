@@ -15,18 +15,13 @@ ClaveÚnica mediante [josecl/emulador-claveunica](https://github.com/josecl/emul
 
 ## Instalación y configuración
 
+Se utiliza de manera similar a los provider de [Socialite](https://socialiteproviders.com/).
+
 Instalar dependencia:
 
 ```shell
 composer require josecl/claveunica
 ```
-
-
-### Configuración
-
-Se utiliza de manera similar a los provider de [Socialite](https://socialiteproviders.com/).
-El evento `SocialiteWasCalled` ya viene configurado, por lo que no es necesario
-realizar dicho paso.
 
 Agregar configuración al archivo `config/services.php`:
 
@@ -38,8 +33,20 @@ Agregar configuración al archivo `config/services.php`:
 ],
 ```
 
-### Uso
+Agregar *event listener* para los eventos `SocialiteWasCalled` en tu archivo
+`app/Providers/EventServiceProvider.php`:
 
+```php
+protected $listen = [
+    \SocialiteProviders\Manager\SocialiteWasCalled::class => [
+        // ...
+        \Josecl\ClaveUnica\ClaveUnicaExtendSocialite::class . '@handle',
+    ],
+];
+```
+
+
+### Uso
 
 Para redireccianar al servicio OAuth usar un contoller que haga redirect con:
 
@@ -55,7 +62,7 @@ de sesión en tu aplicación. Puedes obtener los datos del usuario autenticado
 mediante este ejemplo:
 
 ```php
-    $claveUnicaUser = app(ClaveUnicaGetUser::class)->user();
+    $claveUnicaUser = Socialite::driver('claveunica')->user();
 
     dump($claveUnicaUser->run);
     dump($claveUnicaUser->dv);

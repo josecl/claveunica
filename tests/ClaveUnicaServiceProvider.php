@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Josecl\ClaveUnica;
+namespace Josecl\ClaveUnica\Tests;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 

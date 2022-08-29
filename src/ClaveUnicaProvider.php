@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Josecl\ClaveUnica;
 
+use Exception;
 use SocialiteProviders\Manager\OAuth2\AbstractProvider;
 use SocialiteProviders\Manager\OAuth2\User;
 
@@ -30,30 +31,39 @@ class ClaveUnicaProvider extends AbstractProvider
         return config('services.claveunica.token_uri');
     }
 
+    /**
+     * @throws ClaveUnicaException
+     */
     protected function getUserByToken($token): array
     {
-        $response = $this->getHttpClient()->post(config('services.claveunica.user_uri'), [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-            ],
-        ]);
+        $url = config('services.claveunica.user_uri');
 
-        if ($response->getStatusCode() >= 400) {
-            throw new ClaveUnicaException('Request de user a ' . config('services.claveunica.user_uri') . ' con HTTP status ' . $response->getStatusCode());
+        try {
+            $response = $this->getHttpClient()->post($url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $token,
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (Exception $exception) {
+            throw new ClaveUnicaException('ClaveÚnica getUserByToken fallido: ' . $exception->getMessage(), previous: $exception);
         }
-
-        return json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
     }
 
-    protected function mapUserToObject(array $user)
+    protected function mapUserToObject(array $user): User
     {
-        return (new User())->setRaw($user)->map([
-            'id' => $user['RolUnico']['numero'],
-            'name' => $user['name'],
-            'first_name' => implode(' ', $user['name']['nombres']),
-            'last_name' => implode(' ', $user['name']['apellidos']),
-            'run' => $user['RolUnico']['numero'],
-            'dv' => $user['RolUnico']['DV'],
-        ]);
+        try {
+            return (new User())->setRaw($user)->map([
+                'id' => $user['RolUnico']['numero'],
+                'name' => $user['name'],
+                'first_name' => implode(' ', $user['name']['nombres']),
+                'last_name' => implode(' ', $user['name']['apellidos']),
+                'run' => $user['RolUnico']['numero'],
+                'dv' => $user['RolUnico']['DV'],
+            ]);
+        } catch (Exception $exception) {
+            throw new ClaveUnicaException('ClaveÚnica datos de User inválidos: ' . $exception->getMessage(), previous: $exception);
+        }
     }
 }

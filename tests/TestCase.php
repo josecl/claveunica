@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Josecl\ClaveUnica\Tests;
 
-use Josecl\ClaveUnica\ClaveUnicaServiceProvider;
 use SocialiteProviders\Manager\ServiceProvider;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
